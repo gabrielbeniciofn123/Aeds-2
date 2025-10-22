@@ -1,7 +1,7 @@
 import java.io.*;
 import java.text.Normalizer;
 import java.util.*;
-
+/*50& da aitividade feita*/
 /**
  * TP05Q01 - Pesquisa Binária
  * 
