@@ -1,4 +1,8 @@
-package tp7;
+// Gabriel Benicio Fonseca do Nascimento
+// Matrícula: 889921
+// TP07Q01 - Árvore Binária em Java
+// Inserção por Name + Pesquisa mostrando caminho + Geração de Log
+// Comentários feitos por mim para explicar cada etapa do raciocínio.
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -7,219 +11,114 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-// Classe que só guarda limites dos arrays que eu vou usar
-class NoArrayListM {
-    public static final int MAX_GAMES = 500;
-    public static final int MAX_INNER_ARRAY = 50;
-    public static final int MAX_IDS = 100;
-}
-
-// Classe onde eu armazeno todas as informações dos jogos lidos do CSV
-class GameBinario {
+// Classe que representa um registro básico do CSV (somente ID e Name)
+class Game {
     int id;
     String name;
-    String releaseDate;
-    int estimatedOwners;
-    float price;
 
-    String[] supportedLanguages;
-    int supportedLanguagesCount;
-
-    int metacriticScore;
-    float userScore;
-    int achievements;
-
-    String[] publishers;
-    int publishersCount;
-
-    String[] developers;
-    int developersCount;
-
-    String[] categories;
-    int categoriesCount;
-
-    String[] genres;
-    int genresCount;
-
-    String[] tags;
-    int tagsCount;
-
-    // Construtor padrão para iniciar tudo zerado
-    GameBinario() {
-        this.id = 0;
-        this.name = "";
-        this.releaseDate = "";
-        this.estimatedOwners = 0;
-        this.price = 0.0f;
-
-        // Inicializando todos os arrays que guardam várias infos
-        this.supportedLanguages = new String[NoArrayListM.MAX_INNER_ARRAY];
-        this.supportedLanguagesCount = 0;
-
-        this.metacriticScore = -1;
-        this.userScore = -1.0f;
-        this.achievements = 0;
-
-        this.publishers = new String[NoArrayListM.MAX_INNER_ARRAY];
-        this.publishersCount = 0;
-
-        this.developers = new String[NoArrayListM.MAX_INNER_ARRAY];
-        this.developersCount = 0;
-
-        this.categories = new String[NoArrayListM.MAX_INNER_ARRAY];
-        this.categoriesCount = 0;
-
-        this.genres = new String[NoArrayListM.MAX_INNER_ARRAY];
-        this.genresCount = 0;
-
-        this.tags = new String[NoArrayListM.MAX_INNER_ARRAY];
-        this.tagsCount = 0;
-    }
-
-    // Construtor completo (quando eu já extraí tudo do CSV)
-    GameBinario(int id, String name, String releaseDate, int estimatedOwners, float price,
-            String[] supportedLanguages, int supportedLanguagesCount, int metacriticScore, float userScore,
-            int achievements,
-            String[] publishers, int publishersCount, String[] developers, int developersCount,
-            String[] categories, int categoriesCount, String[] genres, int genresCount, String[] tags, int tagsCount) {
-
+    Game(int id, String name) {
         this.id = id;
         this.name = name;
-        this.releaseDate = releaseDate;
-        this.estimatedOwners = estimatedOwners;
-        this.price = price;
-
-        // Só copio todos os arrays já preenchidos
-        this.supportedLanguages = supportedLanguages;
-        this.supportedLanguagesCount = supportedLanguagesCount;
-
-        this.metacriticScore = metacriticScore;
-        this.userScore = userScore;
-        this.achievements = achievements;
-
-        this.publishers = publishers;
-        this.publishersCount = publishersCount;
-
-        this.developers = developers;
-        this.developersCount = developersCount;
-
-        this.categories = categories;
-        this.categoriesCount = categoriesCount;
-
-        this.genres = genres;
-        this.genresCount = genresCount;
-
-        this.tags = tags;
-        this.tagsCount = tagsCount;
     }
 }
 
-// ============================ ÁRVORE BINÁRIA ===============================
-class ArvoreB {
-    private No raiz; // minha raiz da árvore
+// Nó da árvore binária (organizada por name)
+class No {
+    Game game;
+    No esq, dir;
 
-    // Método para inserir um jogo na árvore
-    public void inserir(GameBinario game) throws Exception {
-        raiz = inserir(game, raiz);
+    No(Game game) {
+        this.game = game;
+        this.esq = null;
+        this.dir = null;
+    }
+}
+
+// Implementação da Árvore Binária
+class Arvore {
+
+    No raiz;
+
+    // Inserção guiada pelo atributo NAME
+    public void inserir(Game g) throws Exception {
+        raiz = inserir(g, raiz);
     }
 
-    // Inserção recursiva
-    private No inserir(GameBinario game, No i) throws Exception {
+    private No inserir(Game g, No i) throws Exception {
 
-        // Se não tem nó aqui ainda, insiro o novo
         if (i == null) {
-            i = new No(game);
+            // Encontrei posição para inserir
+            return new No(g);
 
-        // Se tiver jogo repetido, eu não deixo inserir
-        } else if (game.name.equals(i.game.name)) {
-            throw new Exception("Elemento já existe na árvore");
+        } else if (g.name.compareTo(i.game.name) < 0) {
+            // Name menor → esquerda
+            i.esq = inserir(g, i.esq);
 
-        // Se o nome for menor, vou para a esquerda
-        } else if (game.name.compareTo(i.game.name) < 0) {
-            i.esq = inserir(game, i.esq);
-
-        // Se for maior, vou para a direita
-        } else if (game.name.compareTo(i.game.name) > 0) {
-            i.dir = inserir(game, i.dir);
+        } else if (g.name.compareTo(i.game.name) > 0) {
+            // Name maior → direita
+            i.dir = inserir(g, i.dir);
 
         } else {
-            throw new Exception("Erro ao inserir!");
+            // Name igual → não insere
+            throw new Exception("Elemento já existe na árvore!");
         }
 
         return i;
     }
 
-    // Método principal para pesquisar, já começando da raiz
-    public void pesquisa(String entrada) throws Exception {
-        if (raiz != null) {
-            System.out.print(entrada + ": =>raiz ");
-            ArvoreBinaria.logWriter.print(entrada + ": =>raiz ");
+    // Pesquisa com impressão do caminho
+    public void pesquisar(String nome) {
+        System.out.print(nome + ": =>raiz ");
+        ArvoreBinaria.logWriter.print(nome + ": =>raiz ");
+
+        boolean ok = pesquisar(nome, raiz);
+
+        if (ok) {
+            System.out.println("SIM");
+            ArvoreBinaria.logWriter.println("SIM");
+        } else {
+            System.out.println("NAO");
+            ArvoreBinaria.logWriter.println("NAO");
         }
-        pesquisa(entrada, raiz);
     }
 
-    // Pesquisa recursiva mostrando o caminho percorrido
-    private void pesquisa(String entrada, No i) throws Exception {
+    private boolean pesquisar(String nome, No i) {
 
-        // Caso não encontre o nome na árvore
-        if (i == null) {
-            System.out.println("NAO");
-            ArvoreBinaria.logWriter.print("NAO");
-            return;
-        }
+        if (i == null) return false;
 
-        // Se o nome bate exatamente, encontrei
-        if (entrada.equals(i.game.name)) {
-            System.out.println("SIM");
-            ArvoreBinaria.logWriter.print("SIM");
-            return;
-        }
+        if (nome.equals(i.game.name)) {
+            return true;
 
-        // Se o nome é menor, vou para a esquerda
-        if (entrada.compareTo(i.game.name) < 0) {
+        } else if (nome.compareTo(i.game.name) < 0) {
             System.out.print("esq ");
             ArvoreBinaria.logWriter.print("esq ");
-            pesquisa(entrada, i.esq);
+            return pesquisar(nome, i.esq);
 
-        // Se o nome é maior, vou para a direita
         } else {
             System.out.print("dir ");
             ArvoreBinaria.logWriter.print("dir ");
-            pesquisa(entrada, i.dir);
+            return pesquisar(nome, i.dir);
         }
     }
 }
 
-// Nó da minha árvore (guarda o jogo + ponteiros)
-class No {
-    GameBinario game;
-    No esq, dir;
-
-    No(GameBinario game) {
-        this.game = game;
-        esq = dir = null;
-    }
-}
-
-// ============================ PROGRAMA PRINCIPAL ===============================
+// Classe principal da TP07Q01
 public class ArvoreBinaria {
 
-    public static Scanner sc;
+    public static Scanner sc = new Scanner(System.in);
     public static PrintWriter logWriter;
 
     public static void main(String[] args) {
 
-        sc = new Scanner(System.in);
-
         try {
-            // Arquivo de log com minha matrícula
+            // Log com meu número de matrícula
             logWriter = new PrintWriter(new FileWriter("889921_arvoreBinaria.txt"));
         } catch (IOException e) {
-            System.err.println("Erro ao criar log");
+            System.err.println("Erro ao criar o arquivo de log.");
             return;
         }
 
-        // Aqui eu leio os IDs digitados até achar "FIM"
+        // Lê IDs da primeira parte
         String entrada = sc.nextLine();
         String ids[] = new String[2000];
         int tam = 0;
@@ -229,144 +128,95 @@ public class ArvoreBinaria {
             entrada = sc.nextLine();
         }
 
-        // Crio a árvore com os jogos correspondentes aos IDs digitados
-        ArvoreB arvore = JogosDigitadosArvoreBinaria.inicializacao(ids, tam);
+        // Crio a árvore binária
+        Arvore arvore = new Arvore();
 
-        // Depois faço as pesquisas pelo nome do jogo
+        // Carrego do CSV e insiro os nomes
+        carregarGames(ids, tam, arvore);
+
+        // Segunda parte → nomes para pesquisar
         entrada = sc.nextLine();
         while (!entrada.equals("FIM")) {
-            try {
-                arvore.pesquisa(entrada);
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
+            arvore.pesquisar(entrada.trim());
             entrada = sc.nextLine();
         }
 
-        sc.close();
         logWriter.close();
+        sc.close();
     }
-}
 
-// ============================ LEITURA DO CSV ===============================
-class JogosDigitadosArvoreBinaria {
+    // Carrega games do arquivo CSV
+    static void carregarGames(String[] ids, int tam, Arvore arvore) {
 
-    static int contador = 0;
-    static String[] ids;
-    static int idsTamanho;
-
-    // Aqui eu leio o CSV e construo a árvore com os jogos pedidos
-    static ArvoreB inicializacao(String[] idArray, int tamanho) {
-
-        ArvoreB arvore = new ArvoreB();
-
-        ids = idArray;
-        idsTamanho = tamanho;
-
-        // Para cada ID digitado, eu percorro o CSV até encontrar
-        for (int j = 0; j < tamanho; j++) {
-
-            int indiceEncontrado = -1;
+        for (int j = 0; j < tam; j++) {
 
             try {
-                java.io.File arquivo = new java.io.File("tp7/games.csv");
+                FileInputStream fis = new FileInputStream("/tmp/games.csv");
+                Scanner arq = new Scanner(fis);
 
-                if (!arquivo.exists()) {
-                    System.out.println("games.csv NÃO encontrado!");
-                    return arvore;
-                }
+                if (arq.hasNextLine()) arq.nextLine(); // pulo cabeçalho
 
-                InputStream is = new FileInputStream(arquivo);
-                Scanner sc = new Scanner(is);
+                int idDesejado = Integer.parseInt(ids[j]);
+                boolean achou = false;
 
-                // Pulo o cabeçalho
-                if (sc.hasNextLine()) sc.nextLine();
-
-                // Percorro todo o CSV até achar um ID que bate
-                while (sc.hasNextLine() && indiceEncontrado == -1) {
-
-                    String linha = sc.nextLine();
-                    contador = 0;
+                while (arq.hasNextLine() && !achou) {
+                    String linha = arq.nextLine();
 
                     int id = capturaId(linha);
-                    indiceEncontrado = igualId(id);
 
-                    if (indiceEncontrado != -1) {
+                    if (id == idDesejado) {
 
-                        // Se achei o ID certo, capturo todas as informações
-                        String name = capturaName(linha);
-                        String releaseDate = capturaReleaseDate(linha);
-                        int estimatedOwners = capturaEstimatedOwners(linha);
-                        float price = capturaPrice(linha);
+                        String nome = capturaName(linha);
+                        Game g = new Game(id, nome);
 
-                        String[] supportedLanguages = new String[NoArrayListM.MAX_INNER_ARRAY];
-                        int supportedLanguagesCount = capturaSupportedLanguages(linha, supportedLanguages);
+                        try {
+                            arvore.inserir(g);
+                        } catch (Exception e) {
+                            // Nome já existe → ignoro conforme enunciado
+                        }
 
-                        int metacriticScore = capturaMetacriticScore(linha);
-                        float userScore = capturaUserScore(linha);
-                        int achievements = capturaAchievements(linha);
-
-                        String[] publishers = new String[NoArrayListM.MAX_INNER_ARRAY];
-                        int publishersCount = capturaUltimosArryays(linha, publishers);
-
-                        String[] developers = new String[NoArrayListM.MAX_INNER_ARRAY];
-                        int developersCount = capturaUltimosArryays(linha, developers);
-
-                        String[] categories = new String[NoArrayListM.MAX_INNER_ARRAY];
-                        int categoriesCount = capturaUltimosArryays(linha, categories);
-
-                        String[] genres = new String[NoArrayListM.MAX_INNER_ARRAY];
-                        int genresCount = capturaUltimosArryays(linha, genres);
-
-                        String[] tags = new String[NoArrayListM.MAX_INNER_ARRAY];
-                        int tagsCount = capturaUltimosArryays(linha, tags);
-
-                        // Crio o objeto jogo com tudo preenchido
-                        GameBinario jogo = new GameBinario(
-                            id, name, releaseDate, estimatedOwners, price,
-                            supportedLanguages, supportedLanguagesCount,
-                            metacriticScore, userScore, achievements,
-                            publishers, publishersCount,
-                            developers, developersCount,
-                            categories, categoriesCount,
-                            genres, genresCount,
-                            tags, tagsCount
-                        );
-
-                        // Tiro o ID da lista (não quero buscar de novo)
-                        removerId(indiceEncontrado);
-
-                        // E insiro na árvore
-                        arvore.inserir(jogo);
+                        achou = true;
                     }
                 }
 
-                sc.close();
-                is.close();
+                arq.close();
+                fis.close();
 
             } catch (Exception e) {
-                System.out.println("Erro ao processar CSV: " + e.getMessage());
+                System.out.println("Erro ao ler arquivo: " + e.getMessage());
             }
         }
-
-        return arvore;
     }
 
-    // Aqui eu verifico se um ID digitado bate com o ID do CSV
-    static int igualId(int id) {
-        for (int i = 0; i < idsTamanho; i++) {
-            if (Integer.parseInt(ids[i]) == id) {
-                return i;
-            }
+    // Captura ID do CSV
+    static int capturaId(String linha) {
+        int i = 0;
+        int id = 0;
+
+        while (i < linha.length() && Character.isDigit(linha.charAt(i))) {
+            id = id * 10 + (linha.charAt(i) - '0');
+            i++;
         }
-        return -1;
+
+        return id;
     }
 
-    // Removo o ID para não processar de novo
-    static void removerId(int indice) {
-        for (int j = indice; j < idsTamanho - 1; j++) {
-            ids[j] = ids[j + 1];
+    // Captura Name do CSV
+    static String capturaName(String linha) {
+
+        int i = 0;
+
+        // pular ID
+        while (linha.charAt(i) != ',') i++;
+        i++;
+
+        String name = "";
+
+        while (i < linha.length() && linha.charAt(i) != ',') {
+            name += linha.charAt(i);
+            i++;
         }
-        idsTamanho--;
+
+        return name.trim();
     }
 }
