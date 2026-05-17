@@ -260,6 +260,26 @@ static Restaurante* buscar_por_id(Colecao_Restaurantes* c, int id) {
     return NULL;
 }
 
+/* CORRECAO: ordena a lista encadeada alfabeticamente pelo nome do restaurante */
+void ordenar_lista_por_nome(Lista* l) {
+    if (!l->inicio || !l->inicio->proximo) return;
+
+    int trocou;
+    do {
+        trocou = 0;
+        No* atual = l->inicio;
+        while (atual->proximo) {
+            if (strcmp(atual->restaurante->nome, atual->proximo->restaurante->nome) > 0) {
+                Restaurante* tmp = atual->restaurante;
+                atual->restaurante = atual->proximo->restaurante;
+                atual->proximo->restaurante = tmp;
+                trocou = 1;
+            }
+            atual = atual->proximo;
+        }
+    } while (trocou);
+}
+
 int main() {
     Colecao_Restaurantes* colecao = ler_csv();
     Lista* lista = criar_lista();
@@ -309,6 +329,9 @@ int main() {
             if (r) printf("(R)%s\n", r->nome);
         }
     }
+
+    /* CORRECAO: ordena antes de imprimir */
+    ordenar_lista_por_nome(lista);
 
     char buffer[2048];
     No* atual = lista->inicio;
