@@ -67,8 +67,7 @@ public class SelecaoParcial {
 
     public static void main(String[] args) throws Exception {
         String matricula = "889921";
-        int k = 10;
-         // so precisa dos 10 primeiros ordenados
+        int k = 10; // so precisa dos 10 primeiros ordenados
 
         // le o dataset e monta a lista de registros
         List<Registro> lista = new ArrayList<>();
