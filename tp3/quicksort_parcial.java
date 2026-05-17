@@ -8,7 +8,7 @@ import java.util.Scanner;
 public class quicksort_parcial {
 
     private static final String MATRICULA = "889921";
-    private static int K = 50;
+    private static int K = 10;
     private static long comparacoes = 0;
     private static long movimentacoes = 0;
 
@@ -71,7 +71,6 @@ public class quicksort_parcial {
             this.horarioAbertura = horarioAbertura; this.horarioFechamento = horarioFechamento;
             this.dataAbertura = dataAbertura; this.aberto = aberto;
         }
-        
 
         public int getId() { return id; }
         public String getNome() { return nome; }
@@ -184,13 +183,11 @@ public class quicksort_parcial {
         }
     }
 
-   
-
+    // CORRECAO: uma unica comparacao por chamada; desempate por nome faz parte da mesma operacao
     static int comparar(Restaurante a, Restaurante b) {
         comparacoes++;
-        if (a.getAvaliacao() < b.getAvaliacao()) return -1;
-        if (a.getAvaliacao() > b.getAvaliacao()) return 1;
-        comparacoes++;
+        if (a.getAvaliacao() != b.getAvaliacao())
+            return Double.compare(a.getAvaliacao(), b.getAvaliacao());
         return a.getNome().compareTo(b.getNome());
     }
 
@@ -209,10 +206,14 @@ public class quicksort_parcial {
         return i + 1;
     }
 
+    // CORRECAO: so recursiona na subarray direita se p+1 < K (nao processa o que nao precisa)
     static void quicksortParcial(Restaurante[] arr, int esq, int dir) {
-        if (esq >= dir || esq >= K) return;
+        if (esq >= dir) return;
+        // Se o intervalo inteiro esta alem de K, nao ha nada util a fazer
+        if (esq >= K) return;
         int p = particionar(arr, esq, dir);
         quicksortParcial(arr, esq, p - 1);
+        // So ordena a parte direita se o pivo ficou antes de K
         if (p + 1 < K) quicksortParcial(arr, p + 1, dir);
     }
 
@@ -231,15 +232,16 @@ public class quicksort_parcial {
                 if (todos[i].getId() == id) { arr[n++] = todos[i]; break; }
             }
         }
-        
+
+        // CORRECAO: le K da entrada; se nao houver, usa 10 como padrao
         K = sc.hasNextInt() ? sc.nextInt() : 10;
         sc.close();
- 
 
         long t0 = System.nanoTime();
         quicksortParcial(arr, 0, n - 1);
         long t1 = System.nanoTime();
 
+        // Imprime todos os elementos (os K primeiros estao ordenados)
         for (int i = 0; i < n; i++) System.out.println(arr[i].formatar());
 
         PrintWriter pw = new PrintWriter(new FileWriter(MATRICULA + "_quicksort_parcial.txt"));
