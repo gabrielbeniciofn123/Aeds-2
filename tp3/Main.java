@@ -26,46 +26,45 @@ class Matriz {
 
         inicio = new Celula();
 
-        // cria primeira linha
-        Celula i = inicio;
+        // primeira linha
+        Celula atual = inicio;
 
         for (int j = 1; j < coluna; j++) {
-            i.dir = new Celula();
-            i.dir.esq = i;
-            i = i.dir;
+            atual.dir = new Celula();
+            atual.dir.esq = atual;
+            atual = atual.dir;
         }
 
-        // cria demais linhas
+        // demais linhas
         Celula linhaAnterior = inicio;
 
-        for (int l = 1; l < linha; l++) {
+        for (int i = 1; i < linha; i++) {
 
             Celula novaLinha = new Celula();
 
             linhaAnterior.inf = novaLinha;
             novaLinha.sup = linhaAnterior;
 
-            Celula atual = novaLinha;
-            Celula acima = linhaAnterior;
+            Celula atualNova = novaLinha;
+            Celula atualAcima = linhaAnterior;
 
-            for (int c = 1; c < coluna; c++) {
+            for (int j = 1; j < coluna; j++) {
 
-                atual.dir = new Celula();
-                atual.dir.esq = atual;
+                atualNova.dir = new Celula();
+                atualNova.dir.esq = atualNova;
 
-                acima = acima.dir;
+                atualAcima = atualAcima.dir;
 
-                acima.inf = atual.dir;
-                atual.dir.sup = acima;
+                atualAcima.inf = atualNova.dir;
+                atualNova.dir.sup = atualAcima;
 
-                atual = atual.dir;
+                atualNova = atualNova.dir;
             }
 
             linhaAnterior = linhaAnterior.inf;
         }
     }
 
-    // preencher matriz
     public void preencher(Scanner sc) {
 
         Celula linhaAtual = inicio;
@@ -84,7 +83,6 @@ class Matriz {
         }
     }
 
-    // diagonal principal
     public void mostrarDiagonalPrincipal() {
 
         Celula atual = inicio;
@@ -93,7 +91,7 @@ class Matriz {
 
             System.out.print(atual.elemento + " ");
 
-            if (atual.inf != null) {
+            if (atual.inf != null && atual.dir != null) {
                 atual = atual.inf.dir;
             } else {
                 atual = null;
@@ -103,12 +101,10 @@ class Matriz {
         System.out.println();
     }
 
-    // diagonal secundaria
     public void mostrarDiagonalSecundaria() {
 
         Celula atual = inicio;
 
-        // vai para ultima coluna
         while (atual.dir != null) {
             atual = atual.dir;
         }
@@ -117,7 +113,7 @@ class Matriz {
 
             System.out.print(atual.elemento + " ");
 
-            if (atual.inf != null) {
+            if (atual.inf != null && atual.esq != null) {
                 atual = atual.inf.esq;
             } else {
                 atual = null;
@@ -127,7 +123,6 @@ class Matriz {
         System.out.println();
     }
 
-    // soma
     public Matriz somar(Matriz m) {
 
         Matriz resp = new Matriz(linha, coluna);
@@ -159,7 +154,6 @@ class Matriz {
         return resp;
     }
 
-    // multiplicacao
     public Matriz multiplicar(Matriz m) {
 
         Matriz resp = new Matriz(this.linha, m.coluna);
@@ -170,14 +164,14 @@ class Matriz {
         for (int i = 0; i < this.linha; i++) {
 
             Celula colunaResp = linhaResp;
-            Celula colunaBInicial = m.inicio;
+            Celula colunaB = m.inicio;
 
             for (int j = 0; j < m.coluna; j++) {
 
                 int soma = 0;
 
                 Celula a = linhaA;
-                Celula b = colunaBInicial;
+                Celula b = colunaB;
 
                 for (int k = 0; k < this.coluna; k++) {
 
@@ -190,7 +184,7 @@ class Matriz {
                 colunaResp.elemento = soma;
 
                 colunaResp = colunaResp.dir;
-                colunaBInicial = colunaBInicial.dir;
+                colunaB = colunaB.dir;
             }
 
             linhaA = linhaA.inf;
@@ -200,7 +194,6 @@ class Matriz {
         return resp;
     }
 
-    // mostrar matriz
     public void mostrar() {
 
         Celula linhaAtual = inicio;
@@ -211,7 +204,12 @@ class Matriz {
 
             for (int j = 0; j < coluna; j++) {
 
-                System.out.print(colunaAtual.elemento + " ");
+                System.out.print(colunaAtual.elemento);
+
+                if (j < coluna - 1) {
+                    System.out.print(" ");
+                }
+
                 colunaAtual = colunaAtual.dir;
             }
 
@@ -232,29 +230,24 @@ public class Main {
 
         for (int t = 0; t < casos; t++) {
 
-            // primeira matriz
             int l1 = sc.nextInt();
             int c1 = sc.nextInt();
 
             Matriz m1 = new Matriz(l1, c1);
             m1.preencher(sc);
 
-            // segunda matriz
             int l2 = sc.nextInt();
             int c2 = sc.nextInt();
 
             Matriz m2 = new Matriz(l2, c2);
             m2.preencher(sc);
 
-            // diagonais
             m1.mostrarDiagonalPrincipal();
             m1.mostrarDiagonalSecundaria();
 
-            // soma
             Matriz soma = m1.somar(m2);
             soma.mostrar();
 
-            // multiplicacao
             Matriz mult = m1.multiplicar(m2);
             mult.mostrar();
         }
