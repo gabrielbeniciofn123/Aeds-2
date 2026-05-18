@@ -174,6 +174,7 @@ public class lista_dupla {
             return c;
         }
     }
+
     static class No {
         Restaurante restaurante;
         No anterior, proximo;
