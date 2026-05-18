@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
+
+static const char* MATRICULA = "889921";
+static long long comparacoes = 0;
+static long long movimentacoes = 0;
 
 typedef struct { int ano; int mes; int dia; } Data;
 typedef struct { int hora; int minuto; } Hora;
@@ -174,7 +179,6 @@ Colecao_Restaurantes* ler_csv() {
     ler_csv_colecao(c, "/tmp/restaurantes.csv");
     return c;
 }
-
 typedef struct No {
     Restaurante* restaurante;
     struct No* proximo;
@@ -191,16 +195,10 @@ Lista* criar_lista() {
     return l;
 }
 
-void inserir_inicio(Lista* l, Restaurante* r) {
-    No* novo = (No*) malloc(sizeof(No));
-    novo->restaurante = r; novo->proximo = l->inicio;
-    l->inicio = novo; l->tamanho++;
-}
-
 void inserir_fim(Lista* l, Restaurante* r) {
     No* novo = (No*) malloc(sizeof(No));
     novo->restaurante = r; novo->proximo = NULL;
-    if (l->inicio == NULL) { l->inicio = novo; }
+    if (!l->inicio) { l->inicio = novo; }
     else {
         No* atual = l->inicio;
         while (atual->proximo) atual = atual->proximo;
@@ -209,75 +207,26 @@ void inserir_fim(Lista* l, Restaurante* r) {
     l->tamanho++;
 }
 
-void inserir_pos(Lista* l, Restaurante* r, int pos) {
-    if (pos == 0) { inserir_inicio(l, r); return; }
-    No* novo = (No*) malloc(sizeof(No));
-    novo->restaurante = r;
-    No* atual = l->inicio;
-    for (int i = 0; i < pos - 1 && atual->proximo; i++) atual = atual->proximo;
-    novo->proximo = atual->proximo;
-    atual->proximo = novo;
-    l->tamanho++;
-}
-
-Restaurante* remover_inicio(Lista* l) {
-    if (!l->inicio) return NULL;
-    No* tmp = l->inicio;
-    Restaurante* r = tmp->restaurante;
-    l->inicio = tmp->proximo;
-    free(tmp); l->tamanho--;
-    return r;
-}
-
-Restaurante* remover_fim(Lista* l) {
-    if (!l->inicio) return NULL;
-    if (!l->inicio->proximo) {
-        Restaurante* r = l->inicio->restaurante;
-        free(l->inicio); l->inicio = NULL; l->tamanho--;
-        return r;
+void selecao(Lista* l) {
+    for (No* i = l->inicio; i != NULL; i = i->proximo) {
+        No* min = i;
+        for (No* j = i->proximo; j != NULL; j = j->proximo) {
+            comparacoes++;
+            if (strcmp(j->restaurante->nome, min->restaurante->nome) < 0) min = j;
+        }
+        if (min != i) {
+            Restaurante* tmp = i->restaurante;
+            i->restaurante = min->restaurante;
+            min->restaurante = tmp;
+            movimentacoes += 3;
+        }
     }
-    No* atual = l->inicio;
-    while (atual->proximo->proximo) atual = atual->proximo;
-    Restaurante* r = atual->proximo->restaurante;
-    free(atual->proximo); atual->proximo = NULL;
-    l->tamanho--; return r;
-}
-
-Restaurante* remover_pos(Lista* l, int pos) {
-    if (pos == 0) return remover_inicio(l);
-    No* atual = l->inicio;
-    for (int i = 0; i < pos - 1 && atual->proximo; i++) atual = atual->proximo;
-    No* tmp = atual->proximo;
-    Restaurante* r = tmp->restaurante;
-    atual->proximo = tmp->proximo;
-    free(tmp); l->tamanho--;
-    return r;
 }
 
 static Restaurante* buscar_por_id(Colecao_Restaurantes* c, int id) {
     for (int i = 0; i < c->tamanho; i++)
         if (c->restaurantes[i]->id == id) return c->restaurantes[i];
     return NULL;
-}
-
-/* CORRECAO: ordena a lista encadeada alfabeticamente pelo nome do restaurante */
-void ordenar_lista_por_nome(Lista* l) {
-    if (!l->inicio || !l->inicio->proximo) return;
-
-    int trocou;
-    do {
-        trocou = 0;
-        No* atual = l->inicio;
-        while (atual->proximo) {
-            if (strcmp(atual->restaurante->nome, atual->proximo->restaurante->nome) > 0) {
-                Restaurante* tmp = atual->restaurante;
-                atual->restaurante = atual->proximo->restaurante;
-                atual->proximo->restaurante = tmp;
-                trocou = 1;
-            }
-            atual = atual->proximo;
-        }
-    } while (trocou);
 }
 
 int main() {
@@ -290,56 +239,20 @@ int main() {
         if (r) inserir_fim(lista, r);
     }
 
-    int n; scanf("%d", &n);
-    { int c; while ((c = getchar()) != '\n' && c != EOF); }
-
-    char linha[512];
-    for (int k = 0; k < n; k++) {
-        fgets(linha, sizeof(linha), stdin);
-        int len = 0;
-        while (linha[len] && linha[len] != '\n' && linha[len] != '\r') len++;
-        linha[len] = '\0';
-
-        if (linha[0] == 'I') {
-            if (linha[1] == 'I') {
-                int rid = parse_int(linha + 3);
-                Restaurante* r = buscar_por_id(colecao, rid);
-                if (r) inserir_inicio(lista, r);
-            } else if (linha[1] == 'F') {
-                int rid = parse_int(linha + 3);
-                Restaurante* r = buscar_por_id(colecao, rid);
-                if (r) inserir_fim(lista, r);
-            } else if (linha[1] == '*') {
-                /* I* pos id */
-                int pos = 0, ri = 3;
-                while (linha[ri] >= '0' && linha[ri] <= '9') pos = pos * 10 + (linha[ri++] - '0');
-                ri++;
-                int rid = parse_int(linha + ri);
-                Restaurante* r = buscar_por_id(colecao, rid);
-                if (r) inserir_pos(lista, r, pos);
-            }
-        } else if (linha[0] == 'R') {
-            Restaurante* r = NULL;
-            if (linha[1] == 'I') r = remover_inicio(lista);
-            else if (linha[1] == 'F') r = remover_fim(lista);
-            else if (linha[1] == '*') {
-                int pos = parse_int(linha + 3);
-                r = remover_pos(lista, pos);
-            }
-            if (r) printf("(R)%s\n", r->nome);
-        }
-    }
-
-    /* CORRECAO: ordena antes de imprimir */
-    ordenar_lista_por_nome(lista);
+    clock_t t0 = clock();
+    selecao(lista);
+    clock_t t1 = clock();
+    double tempo = ((double)(t1 - t0)) / CLOCKS_PER_SEC * 1000.0;
 
     char buffer[2048];
-    No* atual = lista->inicio;
-    while (atual) {
+    for (No* atual = lista->inicio; atual; atual = atual->proximo) {
         formatar_restaurante(atual->restaurante, buffer);
         printf("%s\n", buffer);
-        atual = atual->proximo;
     }
+
+    FILE* log = fopen("889921_selecao_flexivel.txt", "w");
+    fprintf(log, "%s\t%lld\t%lld\t%.2f\n", MATRICULA, comparacoes, movimentacoes, tempo);
+    fclose(log);
 
     return 0;
 }
