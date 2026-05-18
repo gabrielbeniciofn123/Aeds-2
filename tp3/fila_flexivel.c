@@ -41,7 +41,6 @@ Data parse_data(char* s) {
     }
     return d;
 }
-
 void formatar_data(Data* data, char* buffer) {
     sprintf(buffer, "%02d/%02d/%04d", data->dia, data->mes, data->ano);
 }
@@ -244,7 +243,6 @@ int main() {
             if (r) printf("(R)%s\n", r->nome);
         }
     }
-
     char buffer[2048];
     No* atual = fila->inicio;
     while (atual) {
