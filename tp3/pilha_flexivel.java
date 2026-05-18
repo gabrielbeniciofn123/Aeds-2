@@ -1,13 +1,9 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class pilha_flexivel {
-
-    private static final String MATRICULA = "889921";
 
     static class Data {
         private int ano, mes, dia;
@@ -178,104 +174,74 @@ public class pilha_flexivel {
             return c;
         }
     }
-
-    /* -------------------------------------------------------
-       Pilha Simplesmente Encadeada
-       Cada No guarda um Restaurante e aponta para o proximo.
-       O topo e sempre o primeiro no da cadeia.
-    ------------------------------------------------------- */
-
     static class No {
         Restaurante restaurante;
         No proximo;
-        No(Restaurante r, No prox) { this.restaurante = r; this.proximo = prox; }
+        No(Restaurante r, No prox) { restaurante = r; proximo = prox; }
     }
 
     static class Pilha {
-        private No topo;
-        private int tamanho;
+        No topo = null;
 
-        public Pilha() { topo = null; tamanho = 0; }
+        void empilhar(Restaurante r) { topo = new No(r, topo); }
 
-        /* Empilha: insere no topo da lista encadeada */
-        public void push(Restaurante r) {
-            topo = new No(r, topo);
-            tamanho++;
-        }
-
-        /* Desempilha: remove do topo e imprime "(R)nome" */
-        public Restaurante pop() {
+        Restaurante desempilhar() {
             if (topo == null) return null;
             Restaurante r = topo.restaurante;
             topo = topo.proximo;
-            tamanho--;
             return r;
-        }
-
-        /* Consulta o topo sem remover */
-        public Restaurante peek() {
-            return topo != null ? topo.restaurante : null;
-        }
-
-        public boolean isEmpty() { return topo == null; }
-        public int getTamanho() { return tamanho; }
-
-        /* Imprime todos os elementos do topo para a base */
-        public void imprimir() {
-            No atual = topo;
-            while (atual != null) {
-                System.out.println(atual.restaurante.formatar());
-                atual = atual.proximo;
-            }
         }
     }
 
-    /* Busca restaurante por ID na colecao */
-    static Restaurante buscarPorId(Restaurante[] todos, int tamanho, int id) {
+    private static Restaurante buscarPorId(Restaurante[] todos, int tamanho, int id) {
         for (int i = 0; i < tamanho; i++)
             if (todos[i].getId() == id) return todos[i];
         return null;
     }
 
-    public static void main(String[] args) throws IOException {
+    private static int lerInt(String s) {
+        int r = 0;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c >= '0' && c <= '9') r = r * 10 + (c - '0');
+        }
+        return r;
+    }
+
+    public static void main(String[] args) {
         ColecaoRestaurantes colecao = ColecaoRestaurantes.lerCsv();
         Restaurante[] todos = colecao.getRestaurantes();
         int tamanho = colecao.getTamanho();
 
         Pilha pilha = new Pilha();
-        Scanner sc = new Scanner(System.in);
 
-        /* Primeira parte: IDs iniciais terminados por -1 */
+        Scanner sc = new Scanner(System.in);
         while (sc.hasNextInt()) {
             int id = sc.nextInt();
             if (id == -1) break;
             Restaurante r = buscarPorId(todos, tamanho, id);
-            if (r != null) pilha.push(r);
+            if (r != null) pilha.empilhar(r);
         }
 
-        /* Segunda parte: numero de operacoes */
-        int n = sc.hasNextInt() ? sc.nextInt() : 0;
-        if (sc.hasNextLine()) sc.nextLine(); // consome o restante da linha
-
+        int n = sc.nextInt();
+        sc.nextLine();
         for (int k = 0; k < n; k++) {
-            String linha = sc.nextLine().trim();
-
-            if (linha.startsWith("II")) {
-                // Empilha (push) — "II id"
-                int id = Integer.parseInt(linha.substring(3).trim());
+            String linha = sc.nextLine();
+            if (linha.charAt(0) == 'I') {
+                int id = lerInt(linha.length() > 2 ? linha.substring(2) : "0");
                 Restaurante r = buscarPorId(todos, tamanho, id);
-                if (r != null) pilha.push(r);
-
-            } else if (linha.startsWith("RI")) {
-                // Desempilha (pop) do topo
-                Restaurante r = pilha.pop();
+                if (r != null) pilha.empilhar(r);
+            } else if (linha.charAt(0) == 'R') {
+                Restaurante r = pilha.desempilhar();
                 if (r != null) System.out.println("(R)" + r.getNome());
             }
         }
-
         sc.close();
 
-        /* Imprime a pilha do topo para a base */
-        pilha.imprimir();
+        No atual = pilha.topo;
+        while (atual != null) {
+            System.out.println(atual.restaurante.formatar());
+            atual = atual.proximo;
+        }
     }
 }
