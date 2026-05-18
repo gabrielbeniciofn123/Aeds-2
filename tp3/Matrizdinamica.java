@@ -220,7 +220,7 @@ class Matriz {
     }
 }
 
-public class Main {
+public class    Matrizdinamica {
 
     public static void main(String[] args) {
 
