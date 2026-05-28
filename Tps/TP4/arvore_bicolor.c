@@ -309,12 +309,6 @@ void inserir(No** raiz, Restaurante* r) {
     inserir_fixup(raiz, novo);
 }
 
-/* ============================================================================
- * PESQUISAR
- *
- * Percurso iterativo idêntico ao da BST — a pesquisa não muda com RB.
- * Usa NIL como sentinela em vez de NULL.
- * ============================================================================ */
 void pesquisar(No* raiz, char* nome) {
     if (raiz == NIL) { printf("NAO\n"); return; }
     char caminho[4096];
@@ -349,9 +343,6 @@ void em_ordem(No* raiz) {
     em_ordem(raiz->dir);
 }
 
-/* ============================================================================
- * MAIN
- * ============================================================================ */
 int main() {
     init_nil();  /* inicializa o sentinela NIL antes de qualquer operação */
 
