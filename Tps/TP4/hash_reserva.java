@@ -10,10 +10,6 @@ public class hash_reserva {
     private static final String MATRICULA = "889921";
     private static long comparacoesPesquisa = 0;
 
-    // =========================================================================
-    // Tamanhos da tabela
-    // =========================================================================
-
     // Área principal: posições 0 a 30  (31 slots)
     private static final int TAM_TAB     = 31;
     // Área de reserva: posições 31 a 49  (19 slots)
@@ -26,9 +22,6 @@ public class hash_reserva {
     // Próxima posição livre na área de reserva (começa em 31)
     private static int proxReserva = TAM_TAB;
 
-    // =========================================================================
-    // Classes auxiliares — idênticas à arvore_binaria.java do TP03
-    // =========================================================================
 
     static class Data {
         private int ano, mes, dia;
@@ -200,13 +193,6 @@ public class hash_reserva {
         }
     }
 
-    // =========================================================================
-    // FUNÇÃO DE TRANSFORMAÇÃO (hash)
-    //
-    // h(nome) = (soma dos códigos ASCII de cada char do nome) mod TAM_TAB
-    //
-    // Exemplo: "AB" → (65 + 66) % 31 = 131 % 31 = 7
-    // =========================================================================
     static int hash(String nome) {
         int soma = 0;
         for (int i = 0; i < nome.length(); i++)
@@ -214,16 +200,6 @@ public class hash_reserva {
         return soma % TAM_TAB;
     }
 
-    // =========================================================================
-    // INSERÇÃO com área de reserva
-    //
-    // 1. Calcula posição h = hash(nome)
-    // 2. Se tabela[h] estiver livre  → insere na posição principal
-    // 3. Se tabela[h] já ocupado (colisão) → insere na próxima posição livre
-    //    da área de reserva (31 a 49), em ordem de chegada
-    // 4. Se a reserva também estiver cheia → imprime o nome do restaurante
-    //    e descarta a inserção
-    // =========================================================================
     static void inserir(Restaurante r) {
         int h = hash(r.getNome());
 
@@ -238,20 +214,6 @@ public class hash_reserva {
             System.out.println(r.getNome());
         }
     }
-
-    // =========================================================================
-    // PESQUISA
-    //
-    // 1. Calcula h = hash(nome)
-    // 2. Verifica tabela[h]: se ocupado, compara o nome (conta comparação)
-    //    → encontrado: retorna "h formatar()"
-    // 3. Percorre a área de reserva [31..proxReserva-1] linearmente
-    //    → cada slot não-nulo conta uma comparação
-    //    → encontrado: retorna "i formatar()"
-    // 4. Não encontrado: retorna "-1"
-    //
-    // Saída: "<posição> <restaurante formatado>"  ou  "-1"
-    // =========================================================================
     static String pesquisar(String nome) {
         int h = hash(nome);
 
@@ -272,9 +234,6 @@ public class hash_reserva {
         return "-1";
     }
 
-    // =========================================================================
-    // MAIN
-    // =========================================================================
     public static void main(String[] args) throws IOException {
         ColecaoRestaurantes colecao = ColecaoRestaurantes.lerCsv();
         Restaurante[] todos = colecao.getRestaurantes();
