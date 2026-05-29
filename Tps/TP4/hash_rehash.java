@@ -9,17 +9,9 @@ public class hash_rehash {
 
     private static final String MATRICULA = "889921";
     private static long comparacoesPesquisa = 0;
-
-    // =========================================================================
-    // Tamanho da tabela — única área, sem reserva
-    // =========================================================================
     private static final int TAM_TAB = 83;
-
     private static Restaurante[] tabela = new Restaurante[TAM_TAB];
 
-    // =========================================================================
-    // Classes auxiliares — idênticas às versões anteriores do TP03
-    // =========================================================================
 
     static class Data {
         private int ano, mes, dia;
@@ -191,15 +183,6 @@ public class hash_rehash {
         }
     }
 
-    // =========================================================================
-    // FUNÇÕES DE TRANSFORMAÇÃO
-    //
-    // h1(nome) = (soma ASCII) mod 83          → posição primária
-    // h2(nome) = (soma ASCII + 1) mod 83      → posição de rehash (colisão)
-    //
-    // A soma ASCII é calculada uma vez e reutilizada em ambas as funções.
-    // =========================================================================
-
     // Calcula a soma dos códigos ASCII de todos os caracteres do nome.
     static int asciiSoma(String nome) {
         int soma = 0;
@@ -220,13 +203,6 @@ public class hash_rehash {
         return (asciiSoma(nome) + 1) % TAM_TAB;
     }
 
-    // =========================================================================
-    // INSERÇÃO com rehash
-    //
-    // 1. Tenta h1: se livre, insere.
-    // 2. Colisão em h1 → tenta h2 (rehash): se livre, insere.
-    // 3. Ambas ocupadas → não é possível inserir: imprime o nome.
-    // =========================================================================
     static void inserir(Restaurante r) {
         int h1 = hash1(r.getNome());
 
@@ -246,17 +222,6 @@ public class hash_rehash {
         }
     }
 
-    // =========================================================================
-    // PESQUISA
-    //
-    // 1. Calcula h1 e verifica tabela[h1] (conta comparação se ocupado).
-    //    → encontrado: retorna "h1 formatar()"
-    // 2. Se não encontrado em h1, calcula h2 e verifica tabela[h2].
-    //    → encontrado: retorna "h2 formatar()"
-    // 3. Não encontrado em nenhuma das duas posições: retorna "-1".
-    //
-    // Saída: "<posição> <restaurante formatado>"  ou  "-1"
-    // =========================================================================
     static String pesquisar(String nome) {
         int h1 = hash1(nome);
 
@@ -278,9 +243,6 @@ public class hash_rehash {
         return "-1";
     }
 
-    // =========================================================================
-    // MAIN
-    // =========================================================================
     public static void main(String[] args) throws IOException {
         ColecaoRestaurantes colecao = ColecaoRestaurantes.lerCsv();
         Restaurante[] todos = colecao.getRestaurantes();
